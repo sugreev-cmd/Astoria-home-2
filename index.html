@@ -2,28 +2,29 @@
 <html lang="en">
 <!--
 ════════════════════════════════════════════════════════════════════════════
-CANTON FAIR FORM - GOOGLE DRIVE EDITION
+CANTON FAIR FORM - COMPLETE FIXED VERSION
 ════════════════════════════════════════════════════════════════════════════
 
-SETUP INSTRUCTIONS:
-1. Deploy your Apps Script (Canton_Fair_Script.gs)
-2. Copy the deployment URL
-3. Search for "SCRIPT_URL" in this file (around line 570)
-4. Replace 'AKfycby_PASTE_YOUR_ID_HERE' with your deployment ID
-5. Save this file
-6. Open in browser - ready to use!
+FEATURES:
+✅ Google Drive image upload
+✅ Auto-save (every 30 seconds)
+✅ Session recovery
+✅ Apple Pencil annotations
+✅ Camera support
+✅ Export/backup
+✅ NO DATA LOSS!
 
-Example:
-Before: https://script.google.com/macros/s/AKfycby_PASTE_YOUR_ID_HERE/exec
-After:  https://script.google.com/macros/s/AKfycby_abc123xyz789/exec
+SETUP:
+1. Deploy Canton_Fair_Script.gs to Google Apps Script
+2. Update SCRIPT_URL on line 1068
+3. Save and use!
 
-That's it! Now you can share this form with anyone.
 ════════════════════════════════════════════════════════════════════════════
 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASTORIA HOME - Canton Fair Product Capture (Drive Version)</title>
+    <title>ASTORIA HOME - Canton Fair Product Capture</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         
@@ -65,7 +66,6 @@ That's it! Now you can share this form with anyone.
         .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
         .header p { font-size: 0.95rem; opacity: 0.9; font-family: 'JetBrains Mono', monospace; }
         
-        /* Settings Icon */
         .settings-icon {
             position: absolute;
             top: 2.5rem;
@@ -91,7 +91,6 @@ That's it! Now you can share this form with anyone.
             fill: white;
         }
 
-        /* Modal Overlay */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -138,7 +137,6 @@ That's it! Now you can share this form with anyone.
         }
         .close-modal:hover { background: var(--bg); }
 
-        /* Form Sections */
         .form-content { padding: 2.5rem; }
         .section {
             margin-bottom: 2.5rem;
@@ -194,7 +192,6 @@ That's it! Now you can share this form with anyone.
         }
         textarea { resize: vertical; min-height: 90px; }
 
-        /* File Upload Styling */
         .file-upload-group {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             padding: 1.25rem;
@@ -223,7 +220,6 @@ That's it! Now you can share this form with anyone.
             opacity: 0.9;
         }
 
-        /* Product Cards */
         .products-section {
             background: white;
             padding: 2rem;
@@ -259,7 +255,6 @@ That's it! Now you can share this form with anyone.
         }
         .remove-product:hover { background: #e53e3e; }
 
-        /* Image Upload Section */
         .image-upload-section {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             padding: 1.25rem;
@@ -272,15 +267,6 @@ That's it! Now you can share this form with anyone.
             font-weight: 600;
             margin-bottom: 0.5rem;
             display: block;
-        }
-        .image-upload-section input[type="file"] {
-            background: white;
-            padding: 0.6rem;
-            border-radius: 6px;
-            width: 100%;
-            cursor: pointer;
-            font-size: 0.85rem;
-            border: none;
         }
         .image-preview { 
             display: flex; 
@@ -342,8 +328,32 @@ That's it! Now you can share this form with anyone.
             font-size: 10px;
             font-weight: 600;
         }
+        .annotate-btn {
+            background: #5a67d8;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .annotate-btn:hover {
+            background: #4c51bf;
+        }
+        .annotated-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #48bb78;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
 
-        /* Buttons */
         .action-buttons { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
         .btn {
             padding: 0.8rem 1.5rem;
@@ -365,45 +375,6 @@ That's it! Now you can share this form with anyone.
         .btn-success:hover { background: #38a169; transform: translateY(-1px); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
 
-        /* Messages - Fixed Position Toast Style */
-        .message {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            display: none;
-            z-index: 9999;
-            max-width: 400px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            animation: slideInRight 0.3s ease;
-        }
-        .message.success { 
-            background: #48bb78; 
-            color: white; 
-            border-left: 4px solid #38a169; 
-        }
-        .message.error { 
-            background: #f56565; 
-            color: white; 
-            border-left: 4px solid #e53e3e; 
-        }
-        .message.show { 
-            display: block; 
-        }
-        @keyframes slideInRight { 
-            from { 
-                opacity: 0; 
-                transform: translateX(100px); 
-            } 
-            to { 
-                opacity: 1; 
-                transform: translateX(0); 
-            } 
-        }
-        
-        /* Message container for in-form messages */
         #messageContainer {
             position: fixed;
             top: 80px;
@@ -461,7 +432,6 @@ That's it! Now you can share this form with anyone.
             background: #e2e8f0;
         }
 
-        /* Loading Spinner */
         .spinner {
             width: 18px; height: 18px;
             border: 3px solid rgba(255,255,255,0.4);
@@ -473,8 +443,8 @@ That's it! Now you can share this form with anyone.
         .loading .spinner { display: inline-block; }
         .loading .btn-text { display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Annotation Modal */
         .annotation-modal {
             display: none;
             position: fixed;
@@ -609,31 +579,6 @@ That's it! Now you can share this form with anyone.
             justify-content: flex-end;
             flex-wrap: wrap;
         }
-        .annotate-btn {
-            background: #5a67d8;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: 600;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-        .annotate-btn:hover {
-            background: #4c51bf;
-        }
-        .annotated-badge {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: #48bb78;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
-        }
 
         @media (max-width: 768px) {
             .form-grid { grid-template-columns: 1fr; }
@@ -642,7 +587,6 @@ That's it! Now you can share this form with anyone.
             .btn { width: 100%; justify-content: center; }
             .settings-icon { top: 1.5rem; right: 1.5rem; }
             
-            /* Toast notifications on mobile */
             #messageContainer {
                 top: auto;
                 bottom: 20px;
@@ -654,12 +598,6 @@ That's it! Now you can share this form with anyone.
             .toast {
                 width: 100%;
             }
-            
-            .message {
-                right: 10px;
-                left: 10px;
-                max-width: 100%;
-            }
         }
     </style>
 </head>
@@ -667,16 +605,14 @@ That's it! Now you can share this form with anyone.
 <div class="container">
     <div class="header">
         <h1>🏢 ASTORIA HOME · CANTON FAIR 2026</h1>
-        <p>VENDOR INTRODUCTION · GOOGLE DRIVE EDITION</p>
+        <p>VENDOR PRODUCT CAPTURE · GOOGLE DRIVE EDITION</p>
         
-        <!-- Settings Icon -->
         <div class="settings-icon" onclick="openSettingsModal()">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
             </svg>
         </div>
         
-        <!-- Export Data Button -->
         <div class="settings-icon" onclick="exportFormData()" style="right: 5.5rem;" title="Export/Backup Data">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="white">
                 <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
@@ -684,7 +620,6 @@ That's it! Now you can share this form with anyone.
         </div>
     </div>
 
-    <!-- Settings Modal -->
     <div class="modal-overlay" id="settingsModal" onclick="closeSettingsModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -721,7 +656,6 @@ That's it! Now you can share this form with anyone.
     <div class="form-content">
         <form id="cantonForm">
 
-            <!-- Section 1: Company Details -->
             <div class="section">
                 <div class="section-title"><span class="section-number">01</span> COMPANY DETAILS</div>
                 <div class="form-grid">
@@ -746,7 +680,6 @@ That's it! Now you can share this form with anyone.
                         <input type="text" name="countryOfManufacture">
                     </div>
                     
-                    <!-- File Uploads -->
                     <div class="form-group file-upload-group">
                         <label>📄 Catalogue Upload</label>
                         <div style="display: flex; gap: 0.5rem;">
@@ -779,7 +712,6 @@ That's it! Now you can share this form with anyone.
                 </div>
             </div>
 
-            <!-- Section 2: Contact -->
             <div class="section">
                 <div class="section-title"><span class="section-number">02</span> CONTACT INFORMATION</div>
                 <div class="form-grid">
@@ -806,7 +738,6 @@ That's it! Now you can share this form with anyone.
                 </div>
             </div>
 
-            <!-- Section 3: Commercial Terms -->
             <div class="section">
                 <div class="section-title"><span class="section-number">03</span> COMMERCIAL TERMS</div>
                 <div class="form-grid">
@@ -848,7 +779,6 @@ That's it! Now you can share this form with anyone.
                 </div>
             </div>
 
-            <!-- Section 4: Product Range -->
             <div class="section">
                 <div class="section-title"><span class="section-number">04</span> PRODUCT RANGE</div>
                 <div class="form-grid">
@@ -885,7 +815,6 @@ That's it! Now you can share this form with anyone.
                 </div>
             </div>
 
-            <!-- Products -->
             <div class="products-section">
                 <div class="section-title" style="margin-bottom: 1rem;">
                     <span style="font-size: 1.2rem;">📦</span> PRODUCT CAPTURE
@@ -896,7 +825,6 @@ That's it! Now you can share this form with anyone.
                 </div>
             </div>
 
-            <!-- Submit -->
             <div class="action-buttons" style="margin-top: 2.5rem;">
                 <button type="submit" class="btn btn-success" id="submitBtn">
                     <span class="btn-text">💾 Submit to Google Sheets</span>
@@ -908,10 +836,8 @@ That's it! Now you can share this form with anyone.
     </div>
 </div>
 
-<!-- Toast Notification Container -->
 <div id="messageContainer"></div>
 
-<!-- Annotation Modal -->
 <div class="annotation-modal" id="annotationModal">
     <div class="annotation-modal-content">
         <div class="annotation-modal-header">
@@ -956,10 +882,8 @@ That's it! Now you can share this form with anyone.
     // ══════════════════════════════════════════════════════════
     
     // ⚠️ IMPORTANT: Apna Apps Script deployment URL yahan paste karo
-    // Format: https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec
-    let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynkp0-EqcPejrUhUEvxfnHvWiUTwnyofxX6myt-45zZOsXXAzIyL96xJVQPxHXfHcm/exec';
+    let SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID_HERE/exec';
     
-    // Default pricing settings (Settings modal se change kar sakte ho)
     let pricingConfig = {
         exchangeRate: 83,
         logisticsFactor: 1.5,
@@ -967,29 +891,24 @@ That's it! Now you can share this form with anyone.
         gstRate: 1.18
     };
     
-    // Load saved settings from localStorage (optional)
     function loadSettings() {
         const saved = localStorage.getItem('cantonFairSettings');
         if (saved) {
             const settings = JSON.parse(saved);
-            // Only override if URL is properly set in localStorage
             if (settings.scriptUrl && settings.scriptUrl.includes('script.google.com')) {
                 SCRIPT_URL = settings.scriptUrl;
             }
-            // Load pricing settings
             if (settings.exchangeRate) pricingConfig.exchangeRate = parseFloat(settings.exchangeRate);
             if (settings.logisticsFactor) pricingConfig.logisticsFactor = parseFloat(settings.logisticsFactor);
             if (settings.marginMultiplier) pricingConfig.marginMultiplier = parseFloat(settings.marginMultiplier);
             if (settings.gstRate) pricingConfig.gstRate = parseFloat(settings.gstRate);
             
-            // Update settings modal fields
             document.getElementById('scriptUrl').value = SCRIPT_URL;
             document.getElementById('exchangeRate').value = pricingConfig.exchangeRate;
             document.getElementById('logisticsFactor').value = pricingConfig.logisticsFactor;
             document.getElementById('marginMultiplier').value = pricingConfig.marginMultiplier;
             document.getElementById('gstRate').value = pricingConfig.gstRate;
         } else {
-            // Set default values in modal
             document.getElementById('scriptUrl').value = SCRIPT_URL;
             document.getElementById('exchangeRate').value = pricingConfig.exchangeRate;
             document.getElementById('logisticsFactor').value = pricingConfig.logisticsFactor;
@@ -1005,7 +924,6 @@ That's it! Now you can share this form with anyone.
         const marginMultiplier = document.getElementById('marginMultiplier').value;
         const gstRate = document.getElementById('gstRate').value;
         
-        // Validate URL
         if (!scriptUrl.includes('script.google.com')) {
             showMessage('❌ Invalid Apps Script URL!', 'error');
             return;
@@ -1021,7 +939,6 @@ That's it! Now you can share this form with anyone.
         
         localStorage.setItem('cantonFairSettings', JSON.stringify(settings));
         
-        // Update runtime config
         SCRIPT_URL = scriptUrl;
         pricingConfig = {
             exchangeRate: parseFloat(exchangeRate),
@@ -1035,21 +952,32 @@ That's it! Now you can share this form with anyone.
     }
     
     // ══════════════════════════════════════════════════════════
-    // AUTO-SAVE & SESSION RECOVERY SYSTEM
+    // AUTO-SAVE & SESSION RECOVERY - FIXED VERSION
     // ══════════════════════════════════════════════════════════
     
     const AUTO_SAVE_KEY = 'cantonFairFormDraft';
-    const AUTO_SAVE_INTERVAL = 30000; // 30 seconds
+    const AUTO_SAVE_INTERVAL = 30000;
     let autoSaveTimer = null;
     
-    // Auto-save form data to localStorage
     function autoSaveFormData() {
         try {
             const formData = new FormData(document.getElementById('cantonForm'));
+            let hasData = false;
+            for (let [key, val] of formData.entries()) {
+                if (val && val.toString().trim()) {
+                    hasData = true;
+                    break;
+                }
+            }
+            
+            if (!hasData && Object.keys(productImages).length === 0) {
+                return;
+            }
+            
             const data = {
                 vendor: {},
                 products: {},
-                productImages: productImages,
+                productImages: {},
                 productAnnotations: productAnnotations,
                 catalogueFileUrl: catalogueFileUrl,
                 visitingCardFileUrl: visitingCardFileUrl,
@@ -1057,14 +985,12 @@ That's it! Now you can share this form with anyone.
                 productCount: productCount
             };
             
-            // Collect vendor data
             for (let [key, val] of formData.entries()) {
                 if (!key.startsWith('products[')) {
                     data.vendor[key] = val;
                 }
             }
             
-            // Collect products data
             for (let [key, val] of formData.entries()) {
                 const m = key.match(/^products\[(\d+)\]\[(\w+)\]$/);
                 if (m) {
@@ -1074,41 +1000,45 @@ That's it! Now you can share this form with anyone.
                 }
             }
             
-            // Save to localStorage (with compression for images)
-            const compressedData = {
-                ...data,
-                productImages: compressImageDataForStorage(productImages)
-            };
+            // FIXED: Compress images - skip uploading ones
+            data.productImages = compressImageDataForStorage(productImages);
             
-            localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(compressedData));
+            const dataString = JSON.stringify(data);
+            const sizeInMB = new Blob([dataString]).size / 1024 / 1024;
             
-            // Show subtle indicator
+            if (sizeInMB > 4) {
+                showMessage('⚠️ Data size large - please submit soon!', 'error');
+            }
+            
+            localStorage.setItem(AUTO_SAVE_KEY, dataString);
             showAutoSaveIndicator('✅ Auto-saved');
             
         } catch (err) {
             console.error('Auto-save failed:', err);
             if (err.name === 'QuotaExceededError') {
-                showMessage('⚠️ Storage full! Please submit form soon.', 'error');
+                showMessage('⚠️ Storage full! Submit form now.', 'error');
             }
         }
     }
     
-    // Compress image data for localStorage
+    // FIXED: Compress only completed images
     function compressImageDataForStorage(images) {
         const compressed = {};
         Object.keys(images).forEach(productId => {
-            compressed[productId] = images[productId].map(img => ({
-                url: img.url,
-                fileId: img.fileId,
-                thumbnailUrl: img.thumbnailUrl,
-                annotated: img.annotated || false
-                // Don't store full base64 - only Drive URLs
-            }));
+            compressed[productId] = images[productId]
+                .filter(img => !img.uploading)  // Skip uploading images
+                .map(img => ({
+                    url: img.url || '',
+                    fileId: img.fileId || '',
+                    thumbnailUrl: img.thumbnailUrl || img.url || '',
+                    annotated: img.annotated || false,
+                    uploading: false
+                }))
+                .filter(img => img.url);  // Only keep valid images
         });
         return compressed;
     }
     
-    // Show auto-save indicator
     function showAutoSaveIndicator(text) {
         let indicator = document.getElementById('autoSaveIndicator');
         if (!indicator) {
@@ -1138,7 +1068,7 @@ That's it! Now you can share this form with anyone.
         }, 2000);
     }
     
-    // Restore saved form data
+    // FIXED: Restore with proper validation
     function restoreFormData() {
         try {
             const saved = localStorage.getItem(AUTO_SAVE_KEY);
@@ -1149,13 +1079,11 @@ That's it! Now you can share this form with anyone.
             const now = new Date();
             const hoursDiff = (now - savedTime) / 1000 / 60 / 60;
             
-            // Only restore if less than 24 hours old
             if (hoursDiff > 24) {
                 localStorage.removeItem(AUTO_SAVE_KEY);
                 return false;
             }
             
-            // Ask user if they want to restore
             const timeAgo = hoursDiff < 1 ? 
                 Math.round(hoursDiff * 60) + ' minutes ago' : 
                 Math.round(hoursDiff) + ' hours ago';
@@ -1165,13 +1093,11 @@ That's it! Now you can share this form with anyone.
                 return false;
             }
             
-            // Restore vendor data
             Object.keys(data.vendor).forEach(key => {
                 const input = document.querySelector(`[name="${key}"]`);
                 if (input) input.value = data.vendor[key];
             });
             
-            // Restore products
             const productIds = Object.keys(data.products);
             productIds.forEach(pid => {
                 if (parseInt(pid) > productCount) {
@@ -1190,18 +1116,36 @@ That's it! Now you can share this form with anyone.
                 });
             });
             
-            // Restore images
-            productImages = data.productImages || {};
+            // FIXED: Restore images with validation
+            if (data.productImages && typeof data.productImages === 'object') {
+                Object.keys(data.productImages).forEach(pid => {
+                    const images = data.productImages[pid];
+                    if (Array.isArray(images) && images.length > 0) {
+                        productImages[pid] = images.map(img => ({
+                            url: img.url || '',
+                            fileId: img.fileId || '',
+                            thumbnailUrl: img.thumbnailUrl || img.url || '',
+                            annotated: img.annotated || false,
+                            uploading: false
+                        })).filter(img => img.url);
+                        
+                        if (productImages[pid].length > 0) {
+                            renderPreviews(parseInt(pid));
+                        }
+                    }
+                });
+            }
+            
             productAnnotations = data.productAnnotations || {};
+            catalogueFileUrl = data.catalogueFileUrl || null;
+            visitingCardFileUrl = data.visitingCardFileUrl || null;
             
-            // Render previews
-            Object.keys(productImages).forEach(pid => {
-                renderPreviews(parseInt(pid));
-            });
-            
-            // Restore file URLs
-            catalogueFileUrl = data.catalogueFileUrl;
-            visitingCardFileUrl = data.visitingCardFileUrl;
+            if (catalogueFileUrl) {
+                document.getElementById('catalogueStatus').textContent = '✅ File restored';
+            }
+            if (visitingCardFileUrl) {
+                document.getElementById('visitingCardStatus').textContent = '✅ File restored';
+            }
             
             showMessage('✅ Draft restored successfully!', 'success');
             return true;
@@ -1209,17 +1153,16 @@ That's it! Now you can share this form with anyone.
         } catch (err) {
             console.error('Restore failed:', err);
             localStorage.removeItem(AUTO_SAVE_KEY);
+            showMessage('⚠️ Could not restore draft', 'error');
             return false;
         }
     }
     
-    // Clear saved draft
     function clearSavedDraft() {
         localStorage.removeItem(AUTO_SAVE_KEY);
         showAutoSaveIndicator('🗑️ Draft cleared');
     }
     
-    // Start auto-save timer
     function startAutoSave() {
         if (autoSaveTimer) clearInterval(autoSaveTimer);
         
@@ -1227,20 +1170,16 @@ That's it! Now you can share this form with anyone.
             autoSaveFormData();
         }, AUTO_SAVE_INTERVAL);
         
-        // Also save on form changes
         const form = document.getElementById('cantonForm');
         form.addEventListener('change', () => {
-            // Debounce: save 2 seconds after last change
             clearTimeout(window.autoSaveDebounce);
             window.autoSaveDebounce = setTimeout(autoSaveFormData, 2000);
         });
     }
     
-    // Save before page unload
     window.addEventListener('beforeunload', (e) => {
         autoSaveFormData();
         
-        // Warn if unsaved data
         const formData = new FormData(document.getElementById('cantonForm'));
         let hasData = false;
         for (let [key, val] of formData.entries()) {
@@ -1257,7 +1196,6 @@ That's it! Now you can share this form with anyone.
         }
     });
     
-    // Initialize on page load
     window.addEventListener('DOMContentLoaded', () => {
         loadSettings();
         restoreFormData();
@@ -1269,12 +1207,11 @@ That's it! Now you can share this form with anyone.
     // ══════════════════════════════════════════════════════════
     
     let productCount = 0;
-    let productImages = {};  // Stores Drive URLs
-    let productAnnotations = {};  // Stores annotation status
+    let productImages = {};
+    let productAnnotations = {};
     let catalogueFileUrl = null;
     let visitingCardFileUrl = null;
     
-    // Annotation state
     let currentAnnotatingProduct = null;
     let currentAnnotatingImageIndex = null;
     let isDrawing = false;
@@ -1317,7 +1254,7 @@ That's it! Now you can share this form with anyone.
         if (!file) return;
         
         const statusEl = document.getElementById(type + 'Status');
-        statusEl.textContent = '⏳ Uploading to Drive...';
+        statusEl.textContent = '⏳ Uploading...';
         
         const reader = new FileReader();
         reader.onload = async function(e) {
@@ -1339,14 +1276,14 @@ That's it! Now you can share this form with anyone.
                     } else {
                         visitingCardFileUrl = result.fileUrl;
                     }
-                    statusEl.textContent = '✅ ' + file.name + ' uploaded!';
+                    statusEl.textContent = '✅ ' + file.name;
                 } else {
-                    statusEl.textContent = '❌ Upload failed';
-                    showMessage('File upload failed: ' + result.error, 'error');
+                    statusEl.textContent = '❌ Failed';
+                    showMessage('Upload failed: ' + result.error, 'error');
                 }
             } catch (err) {
-                statusEl.textContent = '❌ Upload error';
-                showMessage('Upload error: ' + err.message, 'error');
+                statusEl.textContent = '❌ Error';
+                showMessage('Error: ' + err.message, 'error');
             }
         };
         reader.readAsDataURL(file);
@@ -1385,19 +1322,17 @@ That's it! Now you can share this form with anyone.
                 <button type="button" class="remove-product" onclick="removeProduct(${id})">🗑️ Remove</button>
             </div>
             <div class="image-upload-section">
-                <label>📸 Capture or Upload Product Images</label>
+                <label>📸 Product Images</label>
                 
-                <!-- Camera & Gallery Buttons -->
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
                     <button type="button" class="btn" onclick="openCamera(${id})" style="flex: 1; padding: 0.6rem; background: #5a67d8; color: white; font-size: 0.85rem;">
-                        📷 Take Photo
+                        📷 Camera
                     </button>
                     <button type="button" class="btn" onclick="openGallery(${id})" style="flex: 1; padding: 0.6rem; background: #48bb78; color: white; font-size: 0.85rem;">
                         🖼️ Gallery
                     </button>
                 </div>
                 
-                <!-- Hidden file inputs -->
                 <input type="file" id="gallery-${id}" accept="image/*" multiple style="display: none;" onchange="handleImageUpload(${id}, this)">
                 <input type="file" id="camera-${id}" accept="image/*" capture="environment" style="display: none;" onchange="handleImageUpload(${id}, this)">
                 
@@ -1406,11 +1341,11 @@ That's it! Now you can share this form with anyone.
             <div class="form-grid">
                 <div class="form-group full-width">
                     <label>Product Name / Description</label>
-                    <input type="text" name="products[${id}][name]" placeholder="Enter product name">
+                    <input type="text" name="products[${id}][name]" placeholder="Product name">
                 </div>
                 <div class="form-group">
                     <label>Buy Price (USD)</label>
-                    <input type="number" name="products[${id}][buyPrice]" step="0.01" min="0" placeholder="0.00" id="buyPrice-${id}" onchange="calculateMRP(this.value, ${id})">
+                    <input type="number" name="products[${id}][buyPrice]" step="0.01" min="0" placeholder="0.00" onchange="calculateMRP(this.value, ${id})">
                 </div>
                 <div class="form-group">
                     <label>MRP Target (INR)</label>
@@ -1418,7 +1353,7 @@ That's it! Now you can share this form with anyone.
                 </div>
                 <div class="form-group">
                     <label>MOQ (pcs)</label>
-                    <input type="number" name="products[${id}][moq]" min="0" placeholder="0">
+                    <input type="number" name="products[${id}][moq]" min="0">
                 </div>
                 <div class="form-group">
                     <label>Lead Time</label>
@@ -1470,12 +1405,14 @@ That's it! Now you can share this form with anyone.
     }
 
     function removeProduct(id) {
-        document.getElementById(`product-${id}`).remove();
+        const el = document.getElementById(`product-${id}`);
+        if (el) el.remove();
         delete productImages[id];
+        delete productAnnotations[id];
     }
 
     // ══════════════════════════════════════════════════════════
-    // IMAGE COMPRESSION (PREVENTS UPLOAD FAILURES)
+    // IMAGE COMPRESSION
     // ══════════════════════════════════════════════════════════
     
     function compressImage(file, maxWidth = 1200, quality = 0.8) {
@@ -1488,7 +1425,6 @@ That's it! Now you can share this form with anyone.
                     let width = img.width;
                     let height = img.height;
                     
-                    // Resize if too large
                     if (width > maxWidth) {
                         height = (maxWidth / width) * height;
                         width = maxWidth;
@@ -1499,7 +1435,6 @@ That's it! Now you can share this form with anyone.
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // Compress to JPEG
                     const compressed = canvas.toDataURL('image/jpeg', quality);
                     resolve(compressed);
                 };
@@ -1510,10 +1445,9 @@ That's it! Now you can share this form with anyone.
     }
 
     // ══════════════════════════════════════════════════════════
-    // ANNOTATION TOOLS (APPLE PENCIL SUPPORT)
+    // ANNOTATION TOOLS
     // ══════════════════════════════════════════════════════════
     
-    // Tool Selection
     penBtn.addEventListener('click', () => {
         currentTool = 'pen';
         penBtn.classList.add('active');
@@ -1537,7 +1471,6 @@ That's it! Now you can share this form with anyone.
         sizeDisplay.textContent = currentSize + 'px';
     });
 
-    // Open Annotation Modal
     function openAnnotation(productId, imageIndex) {
         currentAnnotatingProduct = productId;
         currentAnnotatingImageIndex = imageIndex;
@@ -1569,12 +1502,10 @@ That's it! Now you can share this form with anyone.
         ctx.drawImage(img, 0, 0, width, height);
     }
 
-    // Close Annotation Modal
     closeAnnotationModalBtn.addEventListener('click', () => {
         annotationModal.classList.remove('active');
     });
 
-    // Drawing Events (Apple Pencil Support)
     canvas.addEventListener('pointerdown', startDrawing);
     canvas.addEventListener('pointermove', draw);
     canvas.addEventListener('pointerup', stopDrawing);
@@ -1599,7 +1530,6 @@ That's it! Now you can share this form with anyone.
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             
-            // Apple Pencil pressure support
             if (e.pressure && e.pressure > 0) {
                 ctx.lineWidth = currentSize * e.pressure * 2;
             }
@@ -1629,7 +1559,6 @@ That's it! Now you can share this form with anyone.
         };
     }
 
-    // Clear Annotations
     clearAnnotations.addEventListener('click', () => {
         if (confirm('Clear all annotations?')) {
             const imgData = productImages[currentAnnotatingProduct][currentAnnotatingImageIndex];
@@ -1645,21 +1574,18 @@ That's it! Now you can share this form with anyone.
         }
     });
 
-    // Save Annotation
     saveAnnotation.addEventListener('click', async () => {
         try {
-            showMessage('💾 Saving annotated image...', 'success');
+            showMessage('💾 Saving...', 'success');
             
-            // Get annotated image as base64
             const annotatedData = canvas.toDataURL('image/jpeg', 0.9);
             
-            // Upload to Drive
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'uploadImage',
                     imageData: annotatedData,
-                    fileName: `Annotated_Product_${currentAnnotatingProduct}_${Date.now()}.jpg`,
+                    fileName: `Annotated_${currentAnnotatingProduct}_${Date.now()}.jpg`,
                     productId: currentAnnotatingProduct
                 })
             });
@@ -1667,7 +1593,6 @@ That's it! Now you can share this form with anyone.
             const result = await response.json();
             
             if (result.success) {
-                // Replace original with annotated version
                 productImages[currentAnnotatingProduct][currentAnnotatingImageIndex] = {
                     url: result.fileUrl,
                     thumbnailUrl: result.thumbnailUrl,
@@ -1676,7 +1601,6 @@ That's it! Now you can share this form with anyone.
                     annotated: true
                 };
                 
-                // Mark as annotated
                 if (!productAnnotations[currentAnnotatingProduct]) {
                     productAnnotations[currentAnnotatingProduct] = [];
                 }
@@ -1684,9 +1608,9 @@ That's it! Now you can share this form with anyone.
                 
                 renderPreviews(currentAnnotatingProduct);
                 annotationModal.classList.remove('active');
-                showMessage('✅ Annotated image saved!', 'success');
+                showMessage('✅ Saved!', 'success');
             } else {
-                showMessage('❌ Save failed: ' + result.error, 'error');
+                showMessage('❌ Failed: ' + result.error, 'error');
             }
             
         } catch (err) {
@@ -1696,25 +1620,19 @@ That's it! Now you can share this form with anyone.
     });
 
     // ══════════════════════════════════════════════════════════
-    // CAMERA & GALLERY CONTROLS
+    // CAMERA & GALLERY
     // ══════════════════════════════════════════════════════════
     
     function openCamera(productId) {
-        const cameraInput = document.getElementById(`camera-${productId}`);
-        if (cameraInput) {
-            cameraInput.click();
-        }
+        document.getElementById(`camera-${productId}`).click();
     }
     
     function openGallery(productId) {
-        const galleryInput = document.getElementById(`gallery-${productId}`);
-        if (galleryInput) {
-            galleryInput.click();
-        }
+        document.getElementById(`gallery-${productId}`).click();
     }
 
     // ══════════════════════════════════════════════════════════
-    // IMAGE UPLOAD TO DRIVE
+    // IMAGE UPLOAD - FIXED VERSION
     // ══════════════════════════════════════════════════════════
     
     async function handleImageUpload(productId, input) {
@@ -1729,10 +1647,8 @@ That's it! Now you can share this form with anyone.
             const file = files[i];
             
             try {
-                // Compress image first
                 const compressedData = await compressImage(file, 1200, 0.8);
                 
-                // Show uploading preview
                 const tempPreview = {
                     url: compressedData,
                     uploading: true
@@ -1740,12 +1656,10 @@ That's it! Now you can share this form with anyone.
                 productImages[productId].push(tempPreview);
                 renderPreviews(productId);
                 
-                // Add small delay to avoid rate limits
                 if (i > 0) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
                 
-                // Upload to Drive
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({
@@ -1758,7 +1672,6 @@ That's it! Now you can share this form with anyone.
                 
                 const result = await response.json();
                 
-                // Update with Drive URL
                 const lastIndex = productImages[productId].length - 1;
                 if (result.success) {
                     productImages[productId][lastIndex] = {
@@ -1771,7 +1684,7 @@ That's it! Now you can share this form with anyone.
                     showMessage(`✅ Image ${i + 1}/${files.length} uploaded!`, 'success');
                 } else {
                     productImages[productId].splice(lastIndex, 1);
-                    showMessage(`❌ Upload failed: ${result.error}`, 'error');
+                    showMessage(`❌ Failed: ${result.error}`, 'error');
                     renderPreviews(productId);
                 }
                 
@@ -1786,9 +1699,12 @@ That's it! Now you can share this form with anyone.
 
     function renderPreviews(productId) {
         const preview = document.getElementById(`preview-${productId}`);
+        if (!preview) return;
+        
         preview.innerHTML = '';
         
-        (productImages[productId] || []).forEach((imgData, i) => {
+        const images = productImages[productId] || [];
+        images.forEach((imgData, i) => {
             const item = document.createElement('div');
             item.className = 'image-item';
             
@@ -1806,7 +1722,7 @@ That's it! Now you can share this form with anyone.
             item.innerHTML = `
                 ${uploadBadge}
                 ${annotatedBadge}
-                <img src="${displaySrc}" alt="Product image ${i+1}">
+                <img src="${displaySrc}" alt="Product ${i+1}">
                 <div class="image-item-actions">
                     <button type="button" class="annotate-btn" onclick="openAnnotation(${productId}, ${i})" ${imgData.uploading ? 'disabled' : ''}>
                         ✏️ ${isAnnotated ? 'Edit' : 'Annotate'}
@@ -1819,8 +1735,10 @@ That's it! Now you can share this form with anyone.
     }
 
     function removeImage(productId, idx) {
-        productImages[productId].splice(idx, 1);
-        renderPreviews(productId);
+        if (productImages[productId]) {
+            productImages[productId].splice(idx, 1);
+            renderPreviews(productId);
+        }
     }
 
     // ══════════════════════════════════════════════════════════
@@ -1842,18 +1760,15 @@ That's it! Now you can share this form with anyone.
                 timestamp: new Date().toISOString() 
             };
 
-            // Collect vendor data
             for (let [key, val] of formData.entries()) {
                 if (!key.startsWith('products[')) {
                     data.vendor[key] = val;
                 }
             }
             
-            // Add file URLs
             data.vendor.catalogueFileUrl = catalogueFileUrl || '';
             data.vendor.visitingCardFileUrl = visitingCardFileUrl || '';
 
-            // Collect products data
             const productsMap = {};
             for (let [key, val] of formData.entries()) {
                 const m = key.match(/^products\[(\d+)\]\[(\w+)\]$/);
@@ -1864,7 +1779,6 @@ That's it! Now you can share this form with anyone.
                 }
             }
 
-            // Add Drive image URLs to products
             Object.keys(productsMap).forEach(pid => {
                 if (productImages[pid] && productImages[pid].length > 0) {
                     productsMap[pid].imageUrls = productImages[pid]
@@ -1876,7 +1790,6 @@ That's it! Now you can share this form with anyone.
 
             data.products = Object.values(productsMap).filter(p => p.name && p.name.trim());
 
-            // Submit to Apps Script
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify(data)
@@ -1885,9 +1798,8 @@ That's it! Now you can share this form with anyone.
             const result = await response.json();
 
             if (result.success) {
-                showMessage(`✅ Success! Vendor ID: ${result.vendorId} | Products: ${result.productsCount}`, 'success');
+                showMessage(`✅ Success! Vendor: ${result.vendorId} | Products: ${result.productsCount}`, 'success');
                 
-                // Clear saved draft
                 clearSavedDraft();
                 
                 setTimeout(() => {
@@ -1895,7 +1807,7 @@ That's it! Now you can share this form with anyone.
                     resetForm();
                 }, 3000);
             } else {
-                showMessage('❌ Submission failed: ' + result.error, 'error');
+                showMessage('❌ Failed: ' + result.error, 'error');
             }
 
         } catch (err) {
@@ -1912,11 +1824,10 @@ That's it! Now you can share this form with anyone.
     // ══════════════════════════════════════════════════════════
     
     function resetForm() {
-        // Check if there's any data
         const hasData = Object.keys(productImages).length > 0 || productCount > 1;
         
         if (hasData) {
-            if (!confirm('⚠️ This will clear all data.\n\nAre you sure?\n\n(Tip: Use Export button to backup first!)')) {
+            if (!confirm('⚠️ Clear all data?\n\n(Tip: Use Export button to backup first!)')) {
                 return;
             }
         }
@@ -1930,16 +1841,14 @@ That's it! Now you can share this form with anyone.
         document.getElementById('visitingCardStatus').textContent = '';
         document.getElementById('productsContainer').innerHTML = '';
         
-        // Clear saved draft
         clearSavedDraft();
         
         addProduct();
     }
     
-    // Export form data as JSON file
     function exportFormData() {
         try {
-            autoSaveFormData(); // Save first
+            autoSaveFormData();
             
             const saved = localStorage.getItem(AUTO_SAVE_KEY);
             if (!saved) {
@@ -1951,7 +1860,6 @@ That's it! Now you can share this form with anyone.
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
             const filename = `Canton_Fair_Backup_${timestamp}.json`;
             
-            // Create downloadable file
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1962,18 +1870,17 @@ That's it! Now you can share this form with anyone.
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            showMessage('✅ Data exported! File downloaded.', 'success');
+            showMessage('✅ Exported!', 'success');
             
         } catch (err) {
             console.error('Export failed:', err);
-            showMessage('❌ Export failed: ' + err.message, 'error');
+            showMessage('❌ Export failed', 'error');
         }
     }
 
     function showMessage(text, type) {
         const container = document.getElementById('messageContainer');
         
-        // Create toast element
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         
@@ -1987,7 +1894,6 @@ That's it! Now you can share this form with anyone.
         
         container.appendChild(toast);
         
-        // Auto remove after 4 seconds
         setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transform = 'translateX(100px)';
@@ -1995,7 +1901,6 @@ That's it! Now you can share this form with anyone.
         }, 4000);
     }
 
-    // Initialize with one product
     addProduct();
 </script>
 </body>
