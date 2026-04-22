@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTORIA HOME - Canton Fair Product Capture (Drive Version)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2c5282;
+            --accent: #ed8936;
+            --accent-hover: #dd6b20;
+            --bg: #f7fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #2d3748;
+            --text-light: #718096;
+            --success: #48bb78;
+            --error: #f56565;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            color: var(--text);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 2.5rem;
+            position: relative;
+        }
+        .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .header p { font-size: 0.95rem; opacity: 0.9; font-family: 'JetBrains Mono', monospace; }
+        
+        /* Settings Icon */
+        .settings-icon {
+            position: absolute;
+            top: 2.5rem;
+            right: 2.5rem;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            padding: 0.6rem;
+            border-radius: 50%;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .settings-icon:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+        .settings-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-header h3 {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-light);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .close-modal:hover { background: var(--bg); }
+
+        /* Form Sections */
+        .form-content { padding: 2.5rem; }
+        .section {
+            margin-bottom: 2.5rem;
+            padding: 2rem;
+            background: var(--bg);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .section-number {
+            background: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+        .required { color: var(--error); }
+        input, select, textarea {
+            padding: 0.7rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(237,137,54,0.12);
+        }
+        textarea { resize: vertical; min-height: 90px; }
+
+        /* File Upload Styling */
+        .file-upload-group {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            padding: 1.25rem;
+            border-radius: 10px;
+        }
+        .file-upload-group label {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .file-upload-group input[type="file"] {
+            background: white;
+            padding: 0.6rem;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border: none;
+        }
+        .file-status {
+            color: white;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        /* Product Cards */
+        .products-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            border: 2px solid var(--border);
+        }
+        .product-card {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border);
+        }
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px dashed var(--border);
+        }
+        .product-number { font-weight: 700; color: var(--primary); font-size: 1rem; }
+        .remove-product {
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .remove-product:hover { background: #e53e3e; }
+
+        /* Image Upload Section */
+        .image-upload-section {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            padding: 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 1.25rem;
+        }
+        .image-upload-section label {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .image-upload-section input[type="file"] {
+            background: white;
+            padding: 0.6rem;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border: none;
+        }
+        .image-preview { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+            margin-top: 12px; 
+        }
+        .image-item { 
+            position: relative; 
+            border-radius: 8px; 
+            overflow: hidden;
+            border: 2px solid white;
+        }
+        .image-item img { 
+            width: 100px; 
+            height: 100px; 
+            object-fit: cover; 
+            display: block; 
+        }
+        .image-item-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            gap: 2px;
+        }
+        .remove-image {
+            flex: 1;
+            background: rgba(220,53,69,0.9);
+            color: white;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .remove-image:hover { background: rgba(220,53,69,1); }
+        .drive-badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: #48bb78;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .uploading-badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: #ed8936;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .action-buttons { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-secondary:hover { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #38a169; transform: translateY(-1px); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+        /* Messages */
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 500;
+            display: none;
+        }
+        .message.success { background: #c6f6d5; color: #22543d; border-left: 4px solid var(--success); }
+        .message.error { background: #fed7d7; color: #742a2a; border-left: 4px solid var(--error); }
+        .message.show { display: block; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 18px; height: 18px;
+            border: 3px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+        .loading .spinner { display: inline-block; }
+        .loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.4rem; }
+            .action-buttons { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .settings-icon { top: 1.5rem; right: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏢 ASTORIA HOME · CANTON FAIR 2026</h1>
+        <p>VENDOR INTRODUCTION · GOOGLE DRIVE EDITION</p>
+        
+        <!-- Settings Icon -->
+        <div class="settings-icon" onclick="openSettingsModal()">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal" onclick="closeSettingsModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>⚙️ Configuration</h3>
+                <button class="close-modal" onclick="closeSettingsModal()">×</button>
+            </div>
+            <div style="display: grid; gap: 1.25rem;">
+                <div class="form-group">
+                    <label>🔗 Apps Script URL</label>
+                    <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/..." style="font-family: monospace; font-size: 0.8rem;">
+                    <small style="color: #718096; font-size: 0.75rem;">Paste your deployed web app URL here</small>
+                </div>
+                <div class="form-group">
+                    <label>💵 USD to INR Rate</label>
+                    <input type="number" id="exchangeRate" value="83" step="0.01" min="1">
+                </div>
+                <div class="form-group">
+                    <label>🚚 Logistics Factor</label>
+                    <input type="number" id="logisticsFactor" value="1.5" step="0.1" min="1">
+                </div>
+                <div class="form-group">
+                    <label>📈 Margin Multiplier</label>
+                    <input type="number" id="marginMultiplier" value="2.8" step="0.1" min="1">
+                </div>
+                <div class="form-group">
+                    <label>🧾 GST Rate</label>
+                    <input type="number" id="gstRate" value="1.18" step="0.01" min="1">
+                </div>
+                <button class="btn btn-success" onclick="saveSettings()">💾 Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-content">
+        <div id="message" class="message"></div>
+
+        <form id="cantonForm">
+
+            <!-- Section 1: Company Details -->
+            <div class="section">
+                <div class="section-title"><span class="section-number">01</span> COMPANY DETAILS</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Company Name <span class="required">*</span></label>
+                        <input type="text" name="companyName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Booth No. <span class="required">*</span></label>
+                        <input type="text" name="boothNo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Zone / Hall</label>
+                        <input type="text" name="zoneHall">
+                    </div>
+                    <div class="form-group">
+                        <label>Date Visited</label>
+                        <input type="date" name="dateVisited">
+                    </div>
+                    <div class="form-group">
+                        <label>Country of Manufacture</label>
+                        <input type="text" name="countryOfManufacture">
+                    </div>
+                    
+                    <!-- File Uploads -->
+                    <div class="form-group file-upload-group">
+                        <label>📄 Catalogue Upload</label>
+                        <input type="file" id="catalogueFile" accept=".pdf,.doc,.docx,image/*" onchange="handleFileUpload('catalogue', this)">
+                        <div class="file-status" id="catalogueStatus"></div>
+                    </div>
+                    
+                    <div class="form-group file-upload-group">
+                        <label>💳 Visiting Card Upload</label>
+                        <input type="file" id="visitingCardFile" accept="image/*,.pdf" onchange="handleFileUpload('visitingCard', this)">
+                        <div class="file-status" id="visitingCardStatus"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Contact -->
+            <div class="section">
+                <div class="section-title"><span class="section-number">02</span> CONTACT INFORMATION</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Contact Person <span class="required">*</span></label>
+                        <input type="text" name="contactPerson" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Designation</label>
+                        <input type="text" name="designation">
+                    </div>
+                    <div class="form-group">
+                        <label>WeChat ID</label>
+                        <input type="text" name="wechatId">
+                    </div>
+                    <div class="form-group">
+                        <label>WhatsApp No.</label>
+                        <input type="tel" name="whatsappNo">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Email Address <span class="required">*</span></label>
+                        <input type="email" name="emailAddress" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Commercial Terms -->
+            <div class="section">
+                <div class="section-title"><span class="section-number">03</span> COMMERCIAL TERMS</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Min Order Qty (pcs)</label>
+                        <input type="number" name="minOrderQty" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Min Order Value (USD)</label>
+                        <input type="number" name="minOrderValue" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Cost (USD)</label>
+                        <input type="text" name="sampleCost" placeholder="e.g., 50 or Free">
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Lead Time</label>
+                        <input type="text" name="sampleLeadTime" placeholder="e.g., 7-10 days">
+                    </div>
+                    <div class="form-group">
+                        <label>Production Lead Time</label>
+                        <input type="text" name="productionLeadTime" placeholder="e.g., 30-45 days">
+                    </div>
+                    <div class="form-group">
+                        <label>Delivery Term</label>
+                        <select name="deliveryTerm">
+                            <option value="">Select...</option>
+                            <option>FOB</option><option>EXW</option><option>CIF</option><option>DDP</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Terms</label>
+                        <input type="text" name="paymentTerms" placeholder="e.g., 30% TT, 70% BL">
+                    </div>
+                    <div class="form-group">
+                        <label>Currency Accepted</label>
+                        <input type="text" name="currencyAccepted" placeholder="e.g., USD, EUR">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Product Range -->
+            <div class="section">
+                <div class="section-title"><span class="section-number">04</span> PRODUCT RANGE</div>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Main Product Categories</label>
+                        <textarea name="mainProductCategories" placeholder="e.g., Home decor, Textiles..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Materials / Finishes Available</label>
+                        <textarea name="materialsFinishes" placeholder="e.g., Wood, Metal, Ceramic..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Customisation Available?</label>
+                        <select name="customisation">
+                            <option value="">Select...</option>
+                            <option>Yes</option><option>No</option><option>Limited</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Certifications</label>
+                        <input type="text" name="certifications" placeholder="e.g., CE, FSC">
+                    </div>
+                    <div class="form-group">
+                        <label>White Label / OEM?</label>
+                        <select name="whiteLabelOEM">
+                            <option value="">Select...</option>
+                            <option>Yes</option><option>No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Packaging Options</label>
+                        <input type="text" name="packagingOptions" placeholder="e.g., Custom box">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products -->
+            <div class="products-section">
+                <div class="section-title" style="margin-bottom: 1rem;">
+                    <span style="font-size: 1.2rem;">📦</span> PRODUCT CAPTURE
+                </div>
+                <div id="productsContainer"></div>
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="addProduct()">➕ Add Product</button>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="action-buttons" style="margin-top: 2.5rem;">
+                <button type="submit" class="btn btn-success" id="submitBtn">
+                    <span class="btn-text">💾 Submit to Google Sheets</span>
+                    <span class="spinner"></span>
+                </button>
+                <button type="reset" class="btn btn-secondary" onclick="resetForm()">🔄 Reset Form</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // ══════════════════════════════════════════════════════════
+    // CONFIGURATION
+    // ══════════════════════════════════════════════════════════
+    
+    // ⚠️ IMPORTANT: Replace with your deployed Apps Script URL
+    let SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+    
+    // Load saved settings
+    function loadSettings() {
+        const saved = localStorage.getItem('cantonFairSettings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            SCRIPT_URL = settings.scriptUrl || SCRIPT_URL;
+            document.getElementById('scriptUrl').value = SCRIPT_URL;
+            document.getElementById('exchangeRate').value = settings.exchangeRate || 83;
+            document.getElementById('logisticsFactor').value = settings.logisticsFactor || 1.5;
+            document.getElementById('marginMultiplier').value = settings.marginMultiplier || 2.8;
+            document.getElementById('gstRate').value = settings.gstRate || 1.18;
+        }
+    }
+    
+    function saveSettings() {
+        const settings = {
+            scriptUrl: document.getElementById('scriptUrl').value,
+            exchangeRate: document.getElementById('exchangeRate').value,
+            logisticsFactor: document.getElementById('logisticsFactor').value,
+            marginMultiplier: document.getElementById('marginMultiplier').value,
+            gstRate: document.getElementById('gstRate').value
+        };
+        
+        localStorage.setItem('cantonFairSettings', JSON.stringify(settings));
+        SCRIPT_URL = settings.scriptUrl;
+        closeSettingsModal();
+        showMessage('✅ Settings saved!', 'success');
+    }
+    
+    loadSettings();
+
+    // ══════════════════════════════════════════════════════════
+    // STATE MANAGEMENT
+    // ══════════════════════════════════════════════════════════
+    
+    let productCount = 0;
+    let productImages = {};  // Stores Drive URLs
+    let catalogueFileUrl = null;
+    let visitingCardFileUrl = null;
+
+    // ══════════════════════════════════════════════════════════
+    // MODAL CONTROLS
+    // ══════════════════════════════════════════════════════════
+    
+    function openSettingsModal() {
+        document.getElementById('settingsModal').classList.add('show');
+    }
+
+    function closeSettingsModal(event) {
+        if (!event || event.target.id === 'settingsModal') {
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // FILE UPLOAD TO DRIVE
+    // ══════════════════════════════════════════════════════════
+    
+    async function handleFileUpload(type, input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const statusEl = document.getElementById(type + 'Status');
+        statusEl.textContent = '⏳ Uploading to Drive...';
+        
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'uploadFile',
+                        fileData: e.target.result,
+                        fileName: `${type}_${Date.now()}_${file.name}`
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (type === 'catalogue') {
+                        catalogueFileUrl = result.fileUrl;
+                    } else {
+                        visitingCardFileUrl = result.fileUrl;
+                    }
+                    statusEl.textContent = '✅ ' + file.name + ' uploaded!';
+                } else {
+                    statusEl.textContent = '❌ Upload failed';
+                    showMessage('File upload failed: ' + result.error, 'error');
+                }
+            } catch (err) {
+                statusEl.textContent = '❌ Upload error';
+                showMessage('Upload error: ' + err.message, 'error');
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // PRICE CALCULATION
+    // ══════════════════════════════════════════════════════════
+    
+    function calculateMRP(usdPrice, productId) {
+        const rate = parseFloat(document.getElementById('exchangeRate').value) || 83;
+        const logistics = parseFloat(document.getElementById('logisticsFactor').value) || 1.5;
+        const margin = parseFloat(document.getElementById('marginMultiplier').value) || 2.8;
+        const gst = parseFloat(document.getElementById('gstRate').value) || 1.18;
+        
+        if (!usdPrice || usdPrice <= 0) return;
+        
+        const mrpInr = usdPrice * logistics * margin * gst * rate;
+        const mrpField = document.querySelector(`input[name="products[${productId}][mrpTarget]"]`);
+        if (mrpField) mrpField.value = mrpInr.toFixed(2);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // PRODUCT MANAGEMENT
+    // ══════════════════════════════════════════════════════════
+    
+    function addProduct() {
+        productCount++;
+        const id = productCount;
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.id = `product-${id}`;
+        card.innerHTML = `
+            <div class="product-header">
+                <span class="product-number">Product #${id}</span>
+                <button type="button" class="remove-product" onclick="removeProduct(${id})">🗑️ Remove</button>
+            </div>
+            <div class="image-upload-section">
+                <label>📸 Upload Product Images (Google Drive)</label>
+                <input type="file" id="images-${id}" accept="image/*" multiple onchange="handleImageUpload(${id}, this)">
+                <div class="image-preview" id="preview-${id}"></div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>Product Name / Description</label>
+                    <input type="text" name="products[${id}][name]" placeholder="Enter product name">
+                </div>
+                <div class="form-group">
+                    <label>Buy Price (USD)</label>
+                    <input type="number" name="products[${id}][buyPrice]" step="0.01" min="0" placeholder="0.00" id="buyPrice-${id}" onchange="calculateMRP(this.value, ${id})">
+                </div>
+                <div class="form-group">
+                    <label>MRP Target (INR)</label>
+                    <input type="number" name="products[${id}][mrpTarget]" step="0.01" min="0" placeholder="Auto-calculated">
+                </div>
+                <div class="form-group">
+                    <label>MOQ (pcs)</label>
+                    <input type="number" name="products[${id}][moq]" min="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Lead Time</label>
+                    <input type="text" name="products[${id}][leadTime]" placeholder="e.g., 30 days">
+                </div>
+                <div class="form-group">
+                    <label>Material / Finish</label>
+                    <input type="text" name="products[${id}][material]" placeholder="e.g., Ceramic">
+                </div>
+                <div class="form-group">
+                    <label>Size / Dimensions</label>
+                    <input type="text" name="products[${id}][size]" placeholder="e.g., 30x20cm">
+                </div>
+                <div class="form-group">
+                    <label>Colour Options</label>
+                    <input type="text" name="products[${id}][colours]" placeholder="e.g., White, Black">
+                </div>
+                <div class="form-group">
+                    <label>Customisation?</label>
+                    <select name="products[${id}][customisation]">
+                        <option value="">Select...</option>
+                        <option>Yes</option><option>No</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label>Status</label>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; padding: 0.45rem 0.85rem; background: white; border: 2px solid var(--border); border-radius: 8px; font-size: 0.85rem;">
+                            <input type="checkbox" name="products[${id}][sampleTaken]" value="Yes"> Sample Taken
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; padding: 0.45rem 0.85rem; background: white; border: 2px solid var(--border); border-radius: 8px; font-size: 0.85rem;">
+                            <input type="checkbox" name="products[${id}][shortlist]" value="Yes"> ⭐ Shortlist
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; padding: 0.45rem 0.85rem; background: white; border: 2px solid var(--border); border-radius: 8px; font-size: 0.85rem;">
+                            <input type="checkbox" name="products[${id}][onHold]" value="Yes"> On Hold
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; padding: 0.45rem 0.85rem; background: white; border: 2px solid var(--border); border-radius: 8px; font-size: 0.85rem;">
+                            <input type="checkbox" name="products[${id}][rejected]" value="Yes"> Rejected
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label>Notes / Observations</label>
+                    <textarea name="products[${id}][notes]" rows="3" placeholder="Notes, negotiations..."></textarea>
+                </div>
+            </div>
+        `;
+        document.getElementById('productsContainer').appendChild(card);
+    }
+
+    function removeProduct(id) {
+        document.getElementById(`product-${id}`).remove();
+        delete productImages[id];
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // IMAGE UPLOAD TO DRIVE
+    // ══════════════════════════════════════════════════════════
+    
+    async function handleImageUpload(productId, input) {
+        if (!productImages[productId]) productImages[productId] = [];
+        
+        const files = input.files;
+        if (files.length === 0) return;
+        
+        showMessage(`📤 Uploading ${files.length} image(s) to Google Drive...`, 'success');
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            
+            reader.onload = async function(e) {
+                try {
+                    // Show uploading preview
+                    const tempPreview = {
+                        url: e.target.result,
+                        uploading: true
+                    };
+                    productImages[productId].push(tempPreview);
+                    renderPreviews(productId);
+                    
+                    // Upload to Drive
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'uploadImage',
+                            imageData: e.target.result,
+                            fileName: `Product_${productId}_${Date.now()}_${file.name}`,
+                            productId: productId
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    // Update with Drive URL
+                    const lastIndex = productImages[productId].length - 1;
+                    if (result.success) {
+                        productImages[productId][lastIndex] = {
+                            url: result.fileUrl,
+                            thumbnailUrl: result.thumbnailUrl,
+                            fileId: result.fileId,
+                            uploading: false
+                        };
+                        renderPreviews(productId);
+                    } else {
+                        productImages[productId].splice(lastIndex, 1);
+                        showMessage('Image upload failed: ' + result.error, 'error');
+                        renderPreviews(productId);
+                    }
+                    
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    showMessage('Upload error: ' + err.message, 'error');
+                }
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        input.value = '';
+    }
+
+    function renderPreviews(productId) {
+        const preview = document.getElementById(`preview-${productId}`);
+        preview.innerHTML = '';
+        
+        (productImages[productId] || []).forEach((imgData, i) => {
+            const item = document.createElement('div');
+            item.className = 'image-item';
+            
+            const displaySrc = imgData.thumbnailUrl || imgData.url;
+            const badge = imgData.uploading ? 
+                '<div class="uploading-badge">⏳ Uploading...</div>' : 
+                '<div class="drive-badge">☁️ Drive</div>';
+            
+            item.innerHTML = `
+                ${badge}
+                <img src="${displaySrc}" alt="Product image ${i+1}">
+                <div class="image-item-actions">
+                    <button type="button" class="remove-image" onclick="removeImage(${productId}, ${i})" ${imgData.uploading ? 'disabled' : ''}>×</button>
+                </div>
+            `;
+            preview.appendChild(item);
+        });
+    }
+
+    function removeImage(productId, idx) {
+        productImages[productId].splice(idx, 1);
+        renderPreviews(productId);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // FORM SUBMISSION
+    // ══════════════════════════════════════════════════════════
+    
+    document.getElementById('cantonForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+
+        try {
+            const formData = new FormData(this);
+            const data = { 
+                vendor: {}, 
+                products: [], 
+                timestamp: new Date().toISOString() 
+            };
+
+            // Collect vendor data
+            for (let [key, val] of formData.entries()) {
+                if (!key.startsWith('products[')) {
+                    data.vendor[key] = val;
+                }
+            }
+            
+            // Add file URLs
+            data.vendor.catalogueFileUrl = catalogueFileUrl || '';
+            data.vendor.visitingCardFileUrl = visitingCardFileUrl || '';
+
+            // Collect products data
+            const productsMap = {};
+            for (let [key, val] of formData.entries()) {
+                const m = key.match(/^products\[(\d+)\]\[(\w+)\]$/);
+                if (m) {
+                    const [, pid, field] = m;
+                    if (!productsMap[pid]) productsMap[pid] = {};
+                    productsMap[pid][field] = val;
+                }
+            }
+
+            // Add Drive image URLs to products
+            Object.keys(productsMap).forEach(pid => {
+                if (productImages[pid] && productImages[pid].length > 0) {
+                    productsMap[pid].imageUrls = productImages[pid]
+                        .filter(img => !img.uploading)
+                        .map(img => img.url);
+                    productsMap[pid].imageCount = productsMap[pid].imageUrls.length;
+                }
+            });
+
+            data.products = Object.values(productsMap).filter(p => p.name && p.name.trim());
+
+            // Submit to Apps Script
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showMessage(`✅ Success! Vendor ID: ${result.vendorId} | Products: ${result.productsCount}`, 'success');
+                setTimeout(() => {
+                    this.reset();
+                    resetForm();
+                }, 3000);
+            } else {
+                showMessage('❌ Submission failed: ' + result.error, 'error');
+            }
+
+        } catch (err) {
+            console.error(err);
+            showMessage('❌ Error: ' + err.message, 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+        }
+    });
+
+    // ══════════════════════════════════════════════════════════
+    // UTILITY FUNCTIONS
+    // ══════════════════════════════════════════════════════════
+    
+    function resetForm() {
+        productImages = {};
+        productCount = 0;
+        catalogueFileUrl = null;
+        visitingCardFileUrl = null;
+        document.getElementById('catalogueStatus').textContent = '';
+        document.getElementById('visitingCardStatus').textContent = '';
+        document.getElementById('productsContainer').innerHTML = '';
+        addProduct();
+    }
+
+    function showMessage(text, type) {
+        const div = document.getElementById('message');
+        div.textContent = text;
+        div.className = `message ${type} show`;
+        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        setTimeout(() => div.classList.remove('show'), 6000);
+    }
+
+    // Initialize with one product
+    addProduct();
+</script>
+</body>
+</html>
