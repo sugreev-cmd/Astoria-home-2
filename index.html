@@ -675,6 +675,13 @@ That's it! Now you can share this form with anyone.
                 <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
             </svg>
         </div>
+        
+        <!-- Export Data Button -->
+        <div class="settings-icon" onclick="exportFormData()" style="right: 5.5rem;" title="Export/Backup Data">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="white">
+                <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
+            </svg>
+        </div>
     </div>
 
     <!-- Settings Modal -->
@@ -950,7 +957,7 @@ That's it! Now you can share this form with anyone.
     
     // ⚠️ IMPORTANT: Apna Apps Script deployment URL yahan paste karo
     // Format: https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec
-    let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynkp0-EqcPejrUhUEvxfnHvWiUTwnyofxX6myt-45zZOsXXAzIyL96xJVQPxHXfHcm/exec';
+    let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_PASTE_YOUR_ID_HERE/exec';
     
     // Default pricing settings (Settings modal se change kar sakte ho)
     let pricingConfig = {
@@ -1027,8 +1034,235 @@ That's it! Now you can share this form with anyone.
         showMessage('✅ Settings saved!', 'success');
     }
     
+    // ══════════════════════════════════════════════════════════
+    // AUTO-SAVE & SESSION RECOVERY SYSTEM
+    // ══════════════════════════════════════════════════════════
+    
+    const AUTO_SAVE_KEY = 'cantonFairFormDraft';
+    const AUTO_SAVE_INTERVAL = 30000; // 30 seconds
+    let autoSaveTimer = null;
+    
+    // Auto-save form data to localStorage
+    function autoSaveFormData() {
+        try {
+            const formData = new FormData(document.getElementById('cantonForm'));
+            const data = {
+                vendor: {},
+                products: {},
+                productImages: productImages,
+                productAnnotations: productAnnotations,
+                catalogueFileUrl: catalogueFileUrl,
+                visitingCardFileUrl: visitingCardFileUrl,
+                timestamp: new Date().toISOString(),
+                productCount: productCount
+            };
+            
+            // Collect vendor data
+            for (let [key, val] of formData.entries()) {
+                if (!key.startsWith('products[')) {
+                    data.vendor[key] = val;
+                }
+            }
+            
+            // Collect products data
+            for (let [key, val] of formData.entries()) {
+                const m = key.match(/^products\[(\d+)\]\[(\w+)\]$/);
+                if (m) {
+                    const [, pid, field] = m;
+                    if (!data.products[pid]) data.products[pid] = {};
+                    data.products[pid][field] = val;
+                }
+            }
+            
+            // Save to localStorage (with compression for images)
+            const compressedData = {
+                ...data,
+                productImages: compressImageDataForStorage(productImages)
+            };
+            
+            localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(compressedData));
+            
+            // Show subtle indicator
+            showAutoSaveIndicator('✅ Auto-saved');
+            
+        } catch (err) {
+            console.error('Auto-save failed:', err);
+            if (err.name === 'QuotaExceededError') {
+                showMessage('⚠️ Storage full! Please submit form soon.', 'error');
+            }
+        }
+    }
+    
+    // Compress image data for localStorage
+    function compressImageDataForStorage(images) {
+        const compressed = {};
+        Object.keys(images).forEach(productId => {
+            compressed[productId] = images[productId].map(img => ({
+                url: img.url,
+                fileId: img.fileId,
+                thumbnailUrl: img.thumbnailUrl,
+                annotated: img.annotated || false
+                // Don't store full base64 - only Drive URLs
+            }));
+        });
+        return compressed;
+    }
+    
+    // Show auto-save indicator
+    function showAutoSaveIndicator(text) {
+        let indicator = document.getElementById('autoSaveIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'autoSaveIndicator';
+            indicator.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: #48bb78;
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                font-size: 0.85rem;
+                z-index: 9998;
+                opacity: 0;
+                transition: opacity 0.3s;
+            `;
+            document.body.appendChild(indicator);
+        }
+        
+        indicator.textContent = text;
+        indicator.style.opacity = '1';
+        
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+        }, 2000);
+    }
+    
+    // Restore saved form data
+    function restoreFormData() {
+        try {
+            const saved = localStorage.getItem(AUTO_SAVE_KEY);
+            if (!saved) return false;
+            
+            const data = JSON.parse(saved);
+            const savedTime = new Date(data.timestamp);
+            const now = new Date();
+            const hoursDiff = (now - savedTime) / 1000 / 60 / 60;
+            
+            // Only restore if less than 24 hours old
+            if (hoursDiff > 24) {
+                localStorage.removeItem(AUTO_SAVE_KEY);
+                return false;
+            }
+            
+            // Ask user if they want to restore
+            const timeAgo = hoursDiff < 1 ? 
+                Math.round(hoursDiff * 60) + ' minutes ago' : 
+                Math.round(hoursDiff) + ' hours ago';
+            
+            if (!confirm(`Found saved draft from ${timeAgo}.\n\nRestore this data?\n\n(Click OK to restore, Cancel to start fresh)`)) {
+                localStorage.removeItem(AUTO_SAVE_KEY);
+                return false;
+            }
+            
+            // Restore vendor data
+            Object.keys(data.vendor).forEach(key => {
+                const input = document.querySelector(`[name="${key}"]`);
+                if (input) input.value = data.vendor[key];
+            });
+            
+            // Restore products
+            const productIds = Object.keys(data.products);
+            productIds.forEach(pid => {
+                if (parseInt(pid) > productCount) {
+                    addProduct();
+                }
+                
+                Object.keys(data.products[pid]).forEach(field => {
+                    const input = document.querySelector(`[name="products[${pid}][${field}]"]`);
+                    if (input) {
+                        if (input.type === 'checkbox') {
+                            input.checked = data.products[pid][field] === 'Yes';
+                        } else {
+                            input.value = data.products[pid][field];
+                        }
+                    }
+                });
+            });
+            
+            // Restore images
+            productImages = data.productImages || {};
+            productAnnotations = data.productAnnotations || {};
+            
+            // Render previews
+            Object.keys(productImages).forEach(pid => {
+                renderPreviews(parseInt(pid));
+            });
+            
+            // Restore file URLs
+            catalogueFileUrl = data.catalogueFileUrl;
+            visitingCardFileUrl = data.visitingCardFileUrl;
+            
+            showMessage('✅ Draft restored successfully!', 'success');
+            return true;
+            
+        } catch (err) {
+            console.error('Restore failed:', err);
+            localStorage.removeItem(AUTO_SAVE_KEY);
+            return false;
+        }
+    }
+    
+    // Clear saved draft
+    function clearSavedDraft() {
+        localStorage.removeItem(AUTO_SAVE_KEY);
+        showAutoSaveIndicator('🗑️ Draft cleared');
+    }
+    
+    // Start auto-save timer
+    function startAutoSave() {
+        if (autoSaveTimer) clearInterval(autoSaveTimer);
+        
+        autoSaveTimer = setInterval(() => {
+            autoSaveFormData();
+        }, AUTO_SAVE_INTERVAL);
+        
+        // Also save on form changes
+        const form = document.getElementById('cantonForm');
+        form.addEventListener('change', () => {
+            // Debounce: save 2 seconds after last change
+            clearTimeout(window.autoSaveDebounce);
+            window.autoSaveDebounce = setTimeout(autoSaveFormData, 2000);
+        });
+    }
+    
+    // Save before page unload
+    window.addEventListener('beforeunload', (e) => {
+        autoSaveFormData();
+        
+        // Warn if unsaved data
+        const formData = new FormData(document.getElementById('cantonForm'));
+        let hasData = false;
+        for (let [key, val] of formData.entries()) {
+            if (val && val.trim()) {
+                hasData = true;
+                break;
+            }
+        }
+        
+        if (hasData && Object.keys(productImages).length > 0) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved data. Are you sure you want to leave?';
+            return e.returnValue;
+        }
+    });
+    
     // Initialize on page load
-    window.addEventListener('DOMContentLoaded', loadSettings);
+    window.addEventListener('DOMContentLoaded', () => {
+        loadSettings();
+        restoreFormData();
+        startAutoSave();
+    });
 
     // ══════════════════════════════════════════════════════════
     // STATE MANAGEMENT
@@ -1652,6 +1886,10 @@ That's it! Now you can share this form with anyone.
 
             if (result.success) {
                 showMessage(`✅ Success! Vendor ID: ${result.vendorId} | Products: ${result.productsCount}`, 'success');
+                
+                // Clear saved draft
+                clearSavedDraft();
+                
                 setTimeout(() => {
                     this.reset();
                     resetForm();
@@ -1674,6 +1912,15 @@ That's it! Now you can share this form with anyone.
     // ══════════════════════════════════════════════════════════
     
     function resetForm() {
+        // Check if there's any data
+        const hasData = Object.keys(productImages).length > 0 || productCount > 1;
+        
+        if (hasData) {
+            if (!confirm('⚠️ This will clear all data.\n\nAre you sure?\n\n(Tip: Use Export button to backup first!)')) {
+                return;
+            }
+        }
+        
         productImages = {};
         productAnnotations = {};
         productCount = 0;
@@ -1682,7 +1929,45 @@ That's it! Now you can share this form with anyone.
         document.getElementById('catalogueStatus').textContent = '';
         document.getElementById('visitingCardStatus').textContent = '';
         document.getElementById('productsContainer').innerHTML = '';
+        
+        // Clear saved draft
+        clearSavedDraft();
+        
         addProduct();
+    }
+    
+    // Export form data as JSON file
+    function exportFormData() {
+        try {
+            autoSaveFormData(); // Save first
+            
+            const saved = localStorage.getItem(AUTO_SAVE_KEY);
+            if (!saved) {
+                showMessage('⚠️ No data to export!', 'error');
+                return;
+            }
+            
+            const data = JSON.parse(saved);
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const filename = `Canton_Fair_Backup_${timestamp}.json`;
+            
+            // Create downloadable file
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showMessage('✅ Data exported! File downloaded.', 'success');
+            
+        } catch (err) {
+            console.error('Export failed:', err);
+            showMessage('❌ Export failed: ' + err.message, 'error');
+        }
     }
 
     function showMessage(text, type) {
